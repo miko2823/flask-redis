@@ -1,0 +1,36 @@
+version: "2.1"
+services:
+  app:
+    build: ./app
+    volumes:
+      - ./app:/var/www/
+    environment:
+      TZ: "Asia/Tokyo"
+    restart: always
+    sysctls:
+      net.core.somaxconn: 8192
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - /tmp/nginx_log:/var/log/nginx
+    volumes_from:
+      - app
+    links:
+      - app:app
+    restart: always
+    sysctls:
+      net.core.somaxconn: 8192
+
+  redis:
+    build: ./redis
+    links:
+      - app:app
+    ports:
+      - "6379:6379"
+    environment:
+      TZ: "Asia/Tokyo"
+    restart: always
